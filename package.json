@@ -1,0 +1,24 @@
+{
+  "name": "Tic-tac-toe",
+  "version": "1.0.0",
+  "description": "Implementing tic-tac-toe with web technologies to try out machine learning later.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/boyum/Tic-tac-toe.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/boyum/Tic-tac-toe/issues"
+  },
+  "homepage": "https://github.com/boyum/Tic-tac-toe#readme",
+  "devDependencies": {
+    "ava": "^0.24.0",
+    "xo": "^0.18.2"
+  }
+}
