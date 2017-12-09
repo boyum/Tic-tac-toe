@@ -24,6 +24,10 @@
     grid-area: header;
   }
 
+  header h1 {
+    text-align: center;
+  }
+
   main {
     grid-area: main;
   }
@@ -43,28 +47,43 @@
     width: 100%;
   }
 
+  .board.game-over label {
+    opacity: .2;
+  }
+
+  .game-status {
+    display: block;
+    margin: 0 auto;
+    text-align: center;
+  }
+
   input[type=checkbox] {
     left: -10000px;
     position: absolute;
   }
 
-  label {
+  .board label {
     cursor: pointer;
+    display: block;
+    height: 100%;
     position: relative;
+    transition: opacity .5s ease-in-out;
   }
 
   input[type=checkbox] + label::after {
+    --field-size: 2rem;
     background-color: #f9f9f9;
     box-shadow: 0 1px 4px rgba(0, 0, 0, .3) inset;
     content: '';
-    height: 2rem;
+    font-size: calc(var(--field-size) * .5);
+    height: var(--field-size);
     left: 50%;
-    line-height: 2rem;
+    line-height: var(--field-size);
     position: absolute;
     text-align: center;
     top: 50%;
     transform: translate(-50%, -50%);
-    width: 2rem;
+    width: var(--field-size);
   }
 
   input[type=checkbox].cross + label::after {
@@ -77,22 +96,36 @@
     content: 'o';
   }
 
-  .game-over {
+  .game-over-message {
+    font-size: 1.5rem;
     left: 50%;
     position: absolute;
     text-align: center;
     top: 50%;
     transform: translate(-50%, -50%);
+    transition: opacity .5s .3s ease-in-out;
   }
 
-  @media screen and (min-device-width: 768px) {
+  .game-over-message[hidden] {
+    display: block;
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  @media screen and (min-width: 768px) {
     /* Tablets and wider */
+    input[type=checkbox] + label::after {
+      --field-size: 3rem;
+    }
   }
 
 
-  @media screen and (max-device-width: 1368px) {
-     :root {
+  @media screen and (min-width: 1368px) {
+    :root {
       --body-grid-template-columns: 1fr 1300px 1fr;
+    }
+    input[type=checkbox] + label::after {
+      --field-size: 3.5rem;
     }
   }
 </style>
@@ -104,7 +137,7 @@
     </nav>
   </header>
   <main>
-    <span>Current player: <span class="current-player--name"></span></span>
+    <span class="game-status">Current player: <span class="current-player--name"></span></span>
     <div class="board">
       <div>
         <input id="top-left" type="checkbox" data-value="0">
@@ -143,7 +176,7 @@
         <label for="bottom-right"></label>
       </div>
 
-      <div class="game-over" hidden>
+      <div class="game-over-message" hidden>
         <span class="current-player--name"></span> wins!!
       </div>
     </div>
@@ -166,7 +199,8 @@
         this.currentPlayerId = 0;
         this.nameElements = document.querySelectorAll('.current-player--name');
         this.gameOver = false;
-        this.messageContainer = this.board.querySelector('.game-over');
+        this.messageContainer = this.board.querySelector('.game-over-message');
+        this.moves = 0;
 
         this.move = this.move.bind(this);
 
@@ -212,6 +246,7 @@
         if (this.gameOver) {
           return;
         }
+
         
         const field = event.currentTarget;
         const fieldIndex = parseInt(field.getAttribute('data-value'));
@@ -229,6 +264,12 @@
         if (this.gameOver) {
           this.endGame();
           return;
+        }
+        
+        this.moves++;
+
+        if (this.moves === 9) {
+          this.endDraw();
         }
 
         this.currentPlayerId = (this.currentPlayerId + 1) % 2;
@@ -279,7 +320,16 @@
       }
 
       endGame() {
+        const currentPlayer = this.players[this.currentPlayerId];
+        
+        this.board.classList.add('game-over');
+        // document.body.classList.add(`${currentPlayer.type}-won`, )
         this.messageContainer.removeAttribute('hidden', false);
+      }
+
+      endDraw() {
+        this.messageContainer.textContent = 'It\'s a draw';
+        this.endGame();
       }
     }
 
