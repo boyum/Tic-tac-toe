@@ -6,140 +6,28 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Tic tac toe</title>
+  <link rel="stylesheet" type="text/css" href="./styles/tic-tac-toe.css" />
 </head>
 
-<style>
-   :root {
-    --body-grid-template-columns: 1fr 95vw 1fr;
-  }
-
-  body {
-    display: grid;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-    grid-template-areas: 'header header header' '. main .' 'footer footer footer';
-    grid-template-columns: var(--body-grid-template-columns);
-  }
-
-  header {
-    grid-area: header;
-  }
-
-  header h1 {
-    text-align: center;
-  }
-
-  main {
-    grid-area: main;
-  }
-
-  footer {
-    grid-area: footer;
-  }
-
-  .board {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    grid-template-rows: 1fr 1fr 1fr;
-    height: 400px;
-    margin: 2rem auto;
-    max-width: 400px;
-    position: relative;
-    width: 100%;
-  }
-
-  .board.game-over label {
-    opacity: .2;
-  }
-
-  .game-status {
-    display: block;
-    margin: 0 auto;
-    text-align: center;
-  }
-
-  input[type=checkbox] {
-    left: -10000px;
-    position: absolute;
-  }
-
-  .board label {
-    cursor: pointer;
-    display: block;
-    height: 100%;
-    position: relative;
-    transition: opacity .5s ease-in-out;
-  }
-
-  input[type=checkbox] + label::after {
-    --field-size: 2rem;
-    background-color: #f9f9f9;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, .3) inset;
-    content: '';
-    font-size: calc(var(--field-size) * .5);
-    height: var(--field-size);
-    left: 50%;
-    line-height: var(--field-size);
-    position: absolute;
-    text-align: center;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    width: var(--field-size);
-  }
-
-  input[type=checkbox].cross + label::after {
-    color: cornflowerblue;
-    content: 'x';
-  }
-
-  input[type=checkbox].circle + label::after{
-    color: tomato;
-    content: 'o';
-  }
-
-  .game-over-message {
-    font-size: 1.5rem;
-    left: 50%;
-    position: absolute;
-    text-align: center;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    transition: opacity .5s .3s ease-in-out;
-  }
-
-  .game-over-message[hidden] {
-    display: block;
-    opacity: 0;
-    visibility: hidden;
-  }
-
-  @media screen and (min-width: 768px) {
-    /* Tablets and wider */
-    input[type=checkbox] + label::after {
-      --field-size: 3rem;
-    }
-  }
-
-
-  @media screen and (min-width: 1368px) {
-    :root {
-      --body-grid-template-columns: 1fr 1300px 1fr;
-    }
-    input[type=checkbox] + label::after {
-      --field-size: 3.5rem;
-    }
-  }
-</style>
 
 <body>
   <header>
-    <h1 class="logo">Sindre og Ida</h1>
+    <h1 class="logo">Tic tac toe</h1>
     <nav>
     </nav>
   </header>
   <main>
-    <span class="game-status">Current player: <span class="current-player--name"></span></span>
+    <span class="game-status" hidden>Current player: <span class="current-player--name"></span></span>
+
+    <dialog class="setup-wizard" hidden>
+      <div class="wizard-step wizard-step--1">
+        <!-- Players -->
+
+      </div>
+    </dialog>
+
     <div class="board">
-      <div>
+      <!-- <div>
         <input id="top-left" type="checkbox" data-value="0">
         <label for="top-left"></label>
       </div>
@@ -178,169 +66,16 @@
 
       <div class="game-over-message" hidden>
         <span class="current-player--name"></span> wins!!
-      </div>
+      </div> -->
     </div>
   </main>
   <footer></footer>
 
-
-  <script>
+  <!-- <script src="./script/tic-tac-toe.js" type="module"></script> -->
+  <script type="module">
     'use strict';
 
-    class TicTacToe {
-      /**
-       * @param {HtmlElement} board
-       */
-      constructor(board) {
-        this.board = board;
-        this.fields = board.querySelectorAll('input[type=checkbox]');
-        this.checkedFieldsWithPoints = new Array(9);
-        this.players = this.initPlayers();
-        this.currentPlayerId = 0;
-        this.nameElements = document.querySelectorAll('.current-player--name');
-        this.gameOver = false;
-        this.messageContainer = this.board.querySelector('.game-over-message');
-        this.moves = 0;
-
-        this.move = this.move.bind(this);
-
-        this.init();
-      }
-
-      restart() {
-        let field;
-
-        for (let i = 0; i < this.fields.length; i++) {
-          field = this.fields[i];
-
-          field.checked = false;
-        }
-
-        this.gameOver = false;
-        this.checkedFieldsWithPoints = this.checkedFieldsWithPoints.map(field => {
-          field = 0;
-        });
-
-        this.messageContainer.setAttribute('hidden', true);                
-      }
-
-      init() {
-        let field;
-
-        for (let i = 0; i < this.fields.length; i++) {
-          field = this.fields[i];
-          field.addEventListener('change', this.move, false);
-        }
-        this.restart();
-        this.updateNameLabel();
-      }
-
-      initPlayers() {
-        const player1 = new Player('Ida', 'cross');
-        const player2 = new Player('Sindre', 'circle');
-
-        return [player1, player2];
-      }
-
-      move(event) {
-        if (this.gameOver) {
-          return;
-        }
-
-        
-        const field = event.currentTarget;
-        const fieldIndex = parseInt(field.getAttribute('data-value'));
-        const currentPlayer = this.players[this.currentPlayerId];
-
-        field.classList.add(currentPlayer.type);
-        field.disabled = true;
-
-        currentPlayer.checkedFields.push(fieldIndex);
-        this.checkedFieldsWithPoints[fieldIndex] = currentPlayer.type === 'cross' ? 1 : -1;
-
-
-        this.gameOver = this.checkWinState();
-
-        if (this.gameOver) {
-          this.endGame();
-          return;
-        }
-        
-        this.moves++;
-
-        if (this.moves === 9) {
-          this.endDraw();
-        }
-
-        this.currentPlayerId = (this.currentPlayerId + 1) % 2;
-        this.updateNameLabel();
-      }
-
-      updateNameLabel() {
-        const currentPlayer = this.players[this.currentPlayerId];
-        
-        for (let i = 0; i < this.nameElements.length; i++) {
-          this.nameElements[i].textContent = currentPlayer.name;
-        }
-      }
-
-      checkWinState() {
-        const currentPlayer = this.players[this.currentPlayerId];
-        const checkedFields = currentPlayer.checkedFields;
-        const boardCheckedFields = this.checkedFieldsWithPoints;
-
-        let gameWon = false;
-
-        if (checkedFields.length < 3) {
-          return gameWon;
-        }
-
-        const horizontalTopPoints = boardCheckedFields[0] + boardCheckedFields[1] + boardCheckedFields[2];
-        const horizontalMidPoints = boardCheckedFields[3] + boardCheckedFields[4] + boardCheckedFields[5];
-        const horizontalBottomPoints = boardCheckedFields[6] + boardCheckedFields[7] + boardCheckedFields[8];
-
-        const verticalLeftPoints = boardCheckedFields[0] + boardCheckedFields[3] + boardCheckedFields[6];
-        const verticalMidPoints = boardCheckedFields[1] + boardCheckedFields[4] + boardCheckedFields[7];
-        const verticalRightPoints = boardCheckedFields[2] + boardCheckedFields[5] + boardCheckedFields[8];
-
-        const diagonalTopLeftToBottomRight = boardCheckedFields[0] + boardCheckedFields[4] + boardCheckedFields[8];
-        const diagonalTopRightToBottomLeft = boardCheckedFields[2] + boardCheckedFields[4] + boardCheckedFields[6];
-        
-        gameWon =
-          horizontalTopPoints * currentPlayer.scoreType === 3
-          || horizontalMidPoints * currentPlayer.scoreType === 3
-          || horizontalBottomPoints * currentPlayer.scoreType === 3
-          || verticalLeftPoints * currentPlayer.scoreType === 3
-          || verticalMidPoints * currentPlayer.scoreType === 3
-          || verticalRightPoints * currentPlayer.scoreType === 3
-          || diagonalTopLeftToBottomRight * currentPlayer.scoreType === 3
-          || diagonalTopRightToBottomLeft * currentPlayer.scoreType === 3;
-
-        return gameWon;
-      }
-
-      endGame() {
-        const currentPlayer = this.players[this.currentPlayerId];
-        
-        this.board.classList.add('game-over');
-        // document.body.classList.add(`${currentPlayer.type}-won`, )
-        this.messageContainer.removeAttribute('hidden', false);
-      }
-
-      endDraw() {
-        this.messageContainer.textContent = 'It\'s a draw';
-        this.endGame();
-      }
-    }
-
-    class Player {
-      constructor(name, type) {
-        this.name = name;
-        this.type = type;
-        this.scoreType = type === 'cross' ? 1 : -1;
-        this.checkedFields = [];
-      }
-    }
+    import TicTacToe from './script/tic-tac-toe.js';    
 
     new TicTacToe(document.querySelector('.board'));
   </script>
